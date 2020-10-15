@@ -109,13 +109,13 @@ non terminal Instruccion printJava, ingresaDatoJava, ciclosJava, declaracionVarJ
                 
 non terminal String  tipos, booleanos;
 
-inicio ::=  inicio cuerpoInicio  
-            |cuerpoInicio;
+inicio ::=  inicio cuerpoInicio {::} 
+            |cuerpoInicio{::};
 
-cuerpoInicio::=     JAVAID cuerpoJava
-                    |VBID cuerpoVisualBasic
-                    |PYID cuerpoPyton
-                    |PROGRAMAID cuerpoLenguajeC;
+cuerpoInicio::=     JAVAID cuerpoJava {::}
+                    |VBID cuerpoVisualBasic {::}
+                    |PYID cuerpoPyton {::}
+                    |PROGRAMAID cuerpoLenguajeC {::};
 
 cuerpoJava::=           cuerpoJava claseJava
                         |claseJava;
@@ -180,10 +180,10 @@ decFuncion::=               PARCIERRA LLAVEABRE cuerpoMetodoJ LLAVECIERRA
                             |parametrosDecJava PARCIERRA LLAVEABRE cuerpoMetodoJ LLAVECIERRA;
 
 parametrosDecJava::=    parametrosDecJava COMA tipos ID
-                        |tipos ID;
+                        |tipos ID ;
 
-parametroJava::=        parametroJava COMA expresionJV  
-                        |expresionJV;    
+parametroJava::=        parametroJava:exp1 COMA expresionJV:exp2  {:exp1.List.add(exp2); RESULT=exp1;:}
+                        |expresionJV: exp {:ListaExp res=new ListadoExpresio{:a.List.add(b); RESULT=a;:}{:a.List.add(b); RESULT=a;:}n(); res.List.add(a);RESULT=res;:};   
 
 cuerpoMetodoJ::=            cuerpoMetodoJ:ins1 cuerpoMetodoJava:ins2 {:a.Lista.add(ins2); RESULT = ins1;:}
                             |cuerpoMetodoJava :a  {:RESULT = a;:};
@@ -203,7 +203,7 @@ cuerpoMetodoJava::=          printJava:a  {:RESULT = a;:}
 
 //******cuerpoMetodoJava**************
 
-printJava::=                SOUTID PARABRE concatJava PARCIERRA PUNTOYCOMA {::};
+printJava::=                SOUTID PARABRE concatJava:conc PARCIERRA PUNTOYCOMA {:RESULT = new PrintInst(conc);:};
 
 ingresaDatoJava::=          ID;
 
@@ -493,7 +493,7 @@ cuerpoSwitchC::=         cuerpoSwitchC caseC
 caseC::=                CASEID expresionJV DOSPUNTOS cuerpoCase;
 
 cuerpoCase::=           cuerpoFuncionC BREAKID PUNTOYCOMA
-                        |cuerpoFuncionC ;
+                        |cuerpoFuncionC:f {:RESULT =f;:};
 
  expresionC::=           expresionJV: e {:RESULT=e;:}; 
 
