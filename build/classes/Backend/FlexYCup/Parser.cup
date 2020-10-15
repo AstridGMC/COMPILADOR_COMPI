@@ -1,0 +1,508 @@
+package Backend.FlexYCup;
+
+import Backend.Arbol.*;
+import java.util.LinkedList;
+import java_cup.runtime.*;
+import Backend.FlexYCup.ErrorS;
+import java.util.ArrayList;
+import Frontend.Principal;
+
+parser code 
+
+{:
+    public void syntax_error(Symbol s){
+        String lexema = s.value.toString();
+        int fila =  s.right;
+        int columna = s.left;
+        String red="\033[31m"; 
+        System.out.println(red + "ERROR SINTACTICO RECUPERADO!! \t\tLexema: " + lexema+ "\t\tFila " + fila +"\t\tColumna: " +columna+"simbolo"  );
+        ErrorS error = new ErrorS(lexema, fila, columna , "error Sintactico");
+        ErrorS.tablaErroresSintacticos.add(error);
+    }
+
+    public void unrrecovered_syntax_error(Symbol s) throws java.lang.Exception {
+        String lexema = s.value.toString();
+        int fila = s.right;
+        int columna = s.left;
+        String red="\033[31m"; 
+        System.out.println(red + "ERROR SINTACTICO SIN RECUPERACION!! \t\tLexema: " + lexema+ "\t\tFila " + fila +"\t\tColumna: " +columna );
+        ErrorS error = new ErrorS(lexema, fila, columna , "error Sintactico");
+        ErrorS.tablaErroresSintacticos.add(error);
+    }
+:}
+
+//----------------------->------------>-------------------->
+action code {:
+
+    public ArrayList<ErrorS> errores= new ArrayList();
+:}
+
+
+terminal    //----------------JAVA------------------
+            JAVAID,IMPORTID,CLASSID,SOUTID, SWITCHID, 
+            PUBLICID, VOIDID, SCANNERID, BREAKID,
+            NEWID, NEXTLINEID, CASEID, 
+
+            //----------VISUAL BASIC----------------
+            VBID, TOID, FORIDVB,  LOOPID, DOIDVB, WHILEIDVB, THENID, IFIDVB, ENDID, ASID,
+            CONSOLEREADID, CONSOLEWRITEID, WRITELNID, SUBID, DIMID, SELECTID, CASEVBID,ELSEIDVB,
+            //-----------PYTHON---------------------
+            PYID, INPUTID, PRINTID, DEFID, INRANGEID, CONTINUEID,
+
+            //-----------LENGUAJE C-----------------
+            PROGRAMAID, INCLUDEID, PRINFID, CINID, MAINID,INDICADORFLOAT, INDICADORINT,INDICADORCHAR,SCANFID,
+
+            //-----------GENERAL---------------------    
+            ID,CHAR, STRING, SIMMAS,MENOS, SIMMENOS, MULTI, DIV, SIMIGUAL, LLAVEABRE,
+            PUNTOYCOMA, LLAVECIERRA, CORCHETECIERRA, CORCHETEABRE, PARABRE, PARCIERRA,
+            DOSPUNTOS, MENORIGUAL, MAYORIGUAL, MENOR, MAYOR, NOT, IGUAL,
+            NUMERO, COMILLA, TRUE, FALSE, INTID, CHARID, FLOATID, COMA,
+
+            FORID, WHILEID, IFID, ELSEID,DOID, RETURNID,AND, OR,DEFAULTID, NEXTID, SIMY  ;
+
+
+non terminal    
+                //GENERAL
+                inicio, cuerpoInicio,
+                
+                //--------JAVA-------
+                cuerpoJava, claseJava,
+                cuerpoClase, expresionVarJV,
+                cuerpoClaseJava, declaracionAsignacionArregloJV, decAsignArregloJV,
+                declararArreglo, tamArregloJava, cuerpoDeclaracionArrJV,
+                asignarArreglo, decFuncion, parametrosDecJava,
+                cuerpoMetodoJava, decParamArr,decParamArr2, paramArr,
+                paramForJava, cuerpoCicloJava,
+                cuerpoCicloJ, ExpresionLogica, condicionRelacionalJava,
+                incrementos, ifCicloJava, elseCiclo,
+                listaCase, case, default, concatJava, expresionJV, E, F,
+                ifElseCiclo1,
+
+                //---------VISUAL BASIC-------
+                cuerpoVisualBasic,  cuerpoVB,
+                asignacionvarVB, declaracionVarVB, moduloVB, cuerpoModuloVB, arregloVB, cuerpoArregloVB,
+                declararArregloVB, indiceArregloVB, indiceArrVB,leerPantallaVB,
+                imprimirPantallaVB, ciclosVB, condicionalesVB, switchVB, cuerpoCasesVB, condicionalIfElse, 
+                condicionalElse, expresionVB, expresionVarVB,
+
+                //--------PYTHON--------------
+                cuerpoPyton, cuerpoPY,
+                declaracionVarPY, declaracionMetodo, cuerpoMetodoPY, paramPY, ciclosPY, condicionalesPY,
+                cicloForPY, whilePY, paramFor, cuerpoCicloPY, expresionPY,switchPY,ifElsePY,cuerpoCPY,cuerpoMetodoPY1,
+                
+                //---------LENGUAJE C----------
+                cuerpoLenguajeC, cuerpoC,
+                declaracionFuncionC, parametroFuncionC, cuerpoFuncionC, daclaracionVarC, daclaracionAsignacionVarC, valPrint,
+                ciclosC,condicionalesC, forC, paramForC, whileC, ifC, elseif, switchCaseC, cuerpoSwitchC,doWhileC,valPrint1, indicadores,
+                caseC, cuerpoCase, expresionC, declaracionesC, cuerpoPrint, leerDatoC, printDatoC1,printDatoC, valLeerDato
+                
+                
+;
+non terminal ExpresionTipo booleanos;
+
+non terminal ListadoInstrucciones cuerpoMetodoJ;
+
+non terminal LisdtadoExpresion parametroJava;
+
+non terminal Instruccion printJava, ingresaDatoJava, ciclosJava, declaracionVarJava, asignacionVarJava, condicionalesJava,
+                         declaracionAsignacionArregloJV switchJava,ifElseCiclo;
+                
+non terminal String  tipos, booleanos;
+
+inicio ::=  inicio cuerpoInicio  
+            |cuerpoInicio;
+
+cuerpoInicio::=     JAVAID cuerpoJava
+                    |VBID cuerpoVisualBasic
+                    |PYID cuerpoPyton
+                    |PROGRAMAID cuerpoLenguajeC;
+
+cuerpoJava::=           cuerpoJava claseJava
+                        |claseJava;
+
+cuerpoVisualBasic::=    cuerpoVisualBasic cuerpoVB
+                        |cuerpoVB;
+
+cuerpoPyton::=          cuerpoPyton cuerpoPY
+                        |cuerpoPY;
+
+cuerpoLenguajeC::=      cuerpoLenguajeC cuerpoC
+                        |cuerpoC;
+//--------------------------------JAVA---------------------------------------
+
+claseJava::=        PUBLICID CLASSID ID LLAVEABRE cuerpoClase LLAVECIERRA;
+
+cuerpoClase::=      cuerpoClase cuerpoClaseJava
+                    |cuerpoClaseJava;
+
+declaracionVarJava::=       tipos ID PUNTOYCOMA
+                            |tipos ID IGUAL expresionVarJV PUNTOYCOMA ;
+
+expresionVarJV::=           expresionJV
+                            |ID tamArregloJava;
+
+asignacionVarJava::=        ID IGUAL expresionJV ;   
+
+cuerpoClaseJava::=          PUBLICID VOIDID ID PARABRE decFuncion
+                            |PUBLICID tipos ID PARABRE decFuncion
+                            |declaracionVarJava
+                            |asignacionVarJava PUNTOYCOMA
+                            |declaracionAsignacionArregloJV;
+
+declaracionAsignacionArregloJV::=  PUBLICID decAsignArregloJV
+                                    |decAsignArregloJV;
+
+decAsignArregloJV::=        declararArreglo
+                            |asignarArreglo;
+                            
+declararArreglo::=          tipos CORCHETEABRE CORCHETECIERRA  ID PUNTOYCOMA
+                            |tipos CORCHETEABRE CORCHETECIERRA  ID IGUAL NEWID tipos  tamArregloJava  PUNTOYCOMA
+                            |tipos CORCHETEABRE CORCHETECIERRA  ID IGUAL cuerpoDeclaracionArrJV;
+
+tamArregloJava::=           CORCHETEABRE NUMERO CORCHETECIERRA
+                            |tamArregloJava CORCHETEABRE NUMERO CORCHETECIERRA;
+                            
+
+cuerpoDeclaracionArrJV::=   decParamArr2;
+
+paramArr::=                 paramArr COMA expresionJV
+                            |expresionJV;
+
+decParamArr::=              LLAVEABRE paramArr LLAVECIERRA;
+
+decParamArr2::=             decParamArr2 COMA decParamArr
+                            |decParamArr;
+
+asignarArreglo::=           ID SIMIGUAL cuerpoDeclaracionArrJV
+                            |ID tamArregloJava SIMIGUAL expresionJV PUNTOYCOMA;
+
+decFuncion::=               PARCIERRA LLAVEABRE cuerpoMetodoJ LLAVECIERRA
+                            |parametrosDecJava PARCIERRA LLAVEABRE cuerpoMetodoJ LLAVECIERRA;
+
+parametrosDecJava::=    parametrosDecJava COMA tipos ID
+                        |tipos ID;
+
+parametroJava::=        parametroJava COMA expresionJV  
+                        |expresionJV;    
+
+cuerpoMetodoJ::=            cuerpoMetodoJ:ins1 cuerpoMetodoJava:ins2 {:a.Lista.add(ins2); RESULT = ins1;:}
+                            |cuerpoMetodoJava :a  {:RESULT = a;:};
+
+cuerpoMetodoJava::=          printJava:a  {:RESULT = a;:}
+                            |ingresaDatoJava:a {:RESULT = a;:}
+                            |ciclosJava:a {:RESULT = a;:}
+                            |declaracionVarJava:a {:RESULT = a;:}
+                            |asignacionVarJava PUNTOYCOMA:a   {:RESULT = a;:}
+                            |condicionalesJava:a  {:RESULT = a;:}
+                            |RETURNID expresionJV PUNTOYCOMA:a {:RESULT = a;:}
+                            |asignacionVarJava:a  {:RESULT = a;:}
+                            |incrementos PUNTOYCOMA:a {:RESULT = a;:}
+                            |declaracionAsignacionArregloJV:a {:RESULT = a;:};
+                            |error LLAVECIERRA {:RESULT=null;:}
+                            |error PUNTOYCOMA {:RESULT=null;:};
+
+//******cuerpoMetodoJava**************
+
+printJava::=                SOUTID PARABRE concatJava PARCIERRA PUNTOYCOMA {::};
+
+ingresaDatoJava::=          ID;
+
+ciclosJava::=                FORID PARABRE paramForJava PARCIERRA LLAVEABRE cuerpoCicloJava LLAVECIERRA 
+                            |WHILEID PARABRE ExpresionLogica PARCIERRA LLAVEABRE cuerpoCicloJava LLAVECIERRA
+                            |DOID cuerpoCicloJava WHILEID PARABRE ExpresionLogica PARCIERRA PUNTOYCOMA;
+
+//_____________________________________CICLOS JAVA_____________________________________
+
+paramForJava::=         declaracionVarJava ExpresionLogica PUNTOYCOMA  incrementos PUNTOYCOMA
+                        |asignacionVarJava PUNTOYCOMA ExpresionLogica PUNTOYCOMA  incrementos PUNTOYCOMA;
+
+cuerpoCicloJava::=      cuerpoCicloJava cuerpoCicloJ
+                        |cuerpoCicloJ;
+
+cuerpoCicloJ::=         BREAKID PUNTOYCOMA
+                        |cuerpoMetodoJava;
+
+ExpresionLogica::=	
+		condicionRelacionalJava:dec1 AND condicionRelacionalJava:dec2  {:RESULT = ExpresionBooleana(dec1, dec2, "&&");:}
+		|condicionRelacionalJava:dec1 OR condicionRelacionalJava:dec2  {:RESULT = ExpresionBooleana(dec1, dec2, "||");:}
+		|NOT condicionRelacionalJava    
+		|condicionRelacionalJava;
+
+condicionRelacionalJava::=   expresionJV IGUAL expresionJV          {:RESULT = ExpresionBooleana(dec1, dec2, "==");:}
+                            |expresionJV NOT SIMIGUAL expresionJV   {:RESULT = ExpresionBooleana(dec1, dec2, "!=");:}
+                            |expresionJV MAYOR expresionJV          {:RESULT = ExpresionBooleana(dec1, dec2, ">");:}
+                            |expresionJV MENOR expresionJV          {:RESULT = ExpresionBooleana(dec1, dec2, "<");:}
+                            |expresionJV MAYORIGUAL expresionJV     {:RESULT = ExpresionBooleana(dec1, dec2, ">=");:}
+                            |expresionJV MENORIGUAL expresionJV     {:RESULT = ExpresionBooleana(dec1, dec2, "<=");:};
+
+incrementos::=   expresionJV  SIMMENOS SIMMENOS
+                |expresionJV SIMMAS SIMMAS 
+                |expresionJV:exp {:RESULT= exp;:};
+
+
+
+//_________________condicionalesJava_____________
+
+condicionalesJava::=        ifElseCiclo:if      {:RESULT= switch;:}
+                            |switchJava:switch  {:RESULT= switch;:};
+
+ifCicloJava::=              IFID PARABRE ExpresionLogica PARCIERRA LLAVEABRE cuerpoCicloJava LLAVECIERRA;
+
+ifElseCiclo::=               ifElseCiclo  ifElseCiclo1
+                            |ifCicloJava;
+
+ifElseCiclo1::=             elseCiclo;
+
+elseCiclo::=                LLAVEABRE cuerpoCicloJava LLAVECIERRA;
+
+switchJava::=               SWITCHID PARABRE expresionJV PARCIERRA  LLAVEABRE listaCase LLAVECIERRA
+                            SWITCHID PARABRE expresionJV PARCIERRA  LLAVEABRE listaCase default LLAVECIERRA;
+
+listaCase::=                listaCase case 
+                            |case;
+
+case::=                     CASEID F DOSPUNTOS cuerpoMetodoJava BREAKID PUNTOYCOMA
+                            |CASEID F DOSPUNTOS cuerpoMetodoJava;
+
+default::=                  DEFAULTID cuerpoMetodoJava;
+
+//********
+concatJava::=               F SIMMAS F
+                            |F;
+
+expresionJV::=              expresionJV SIMMAS E
+                            |expresionJV MENOS E
+                            |E;
+
+E::=                        E MULTI F
+                            |E DIV F 
+                            |F:f  {RESULT = f;};
+
+F::=                        ID:id       {:RESULT=new ExpresionID(null,id,null,false);:}
+                            |CHAR:char   {:RESULT=new ExpLiteral(char,"char");:}
+                            |NUMERO:num {:RESULT=new ExpLiteral(num,"int");:}
+                            |NUMERO:num1 PUNTO NUMERO:num2 {:RESULT=new ExpresionTipo(num1+"."+num2,"float");:}
+                            |booleanos:bool {:RESULT= bool;:}
+                            |ID:id PARABRE parametroJava PARCIERRA {:RESULT=new ExpresionID(null,id,null,true);:};;
+
+ 
+
+//-------------------------------VISUAL BASIC---------------------------------
+
+cuerpoVB::=                  declaracionVarVB
+                            |moduloVB
+                            |asignacionvarVB;
+
+asignacionvarVB::=          ID IGUAL expresionVB;
+
+moduloVB::=                 PUBLICID SUBID tipos cuerpoModuloVB ENDID SUBID
+                            |error cuerpoModuloVB;
+
+cuerpoModuloVB::=           ciclosVB
+                            |imprimirPantallaVB
+                            |leerPantallaVB
+                            |asignacionvarVB
+                            |condicionalesVB
+                            |arregloVB
+                            |error ENDID {:RESULT=null;:};;
+
+arregloVB::=                declararArregloVB
+                            |declararArreglo SIMIGUAL cuerpoArregloVB
+                            |ID PARABRE NUMERO PARCIERRA IGUAL expresionVB;
+
+
+leerPantallaVB::=           CONSOLEREADID
+                            |ID IGUAL CONSOLEREADID;
+
+cuerpoArregloVB::=          cuerpoDeclaracionArrJV;
+
+
+declararArregloVB::=          DIMID ID PARABRE PARCIERRA ASID tipos
+                            |DIMID ID PARABRE indiceArregloVB PARCIERRA ASID tipos;
+
+indiceArregloVB::=          indiceArregloVB COMA indiceArrVB
+                            |indiceArrVB;
+
+
+indiceArrVB::=              NUMERO TOID NUMERO
+                            |NUMERO;
+
+declaracionVarVB::=         DIMID ID ASID tipos
+                            |DIMID ID ASID tipos IGUAL expresionVB;
+
+imprimirPantallaVB::=       CONSOLEWRITEID  PARABRE  expresionVB  PARCIERRA;
+
+ciclosVB::=                  FORIDVB asignacionvarVB TOID expresionVB cuerpoModuloVB NEXTID ID
+                            |DOIDVB WHILEIDVB  ExpresionLogica  cuerpoModuloVB LOOPID
+                            |DOIDVB cuerpoModuloVB LOOPID WHILEIDVB ExpresionLogica;
+
+condicionalesVB::=          condicionalIfElse
+                            switchVB;
+
+switchVB::=                 SELECTID CASEVBID expresionVB cuerpoCasesVB ENDID SELECTID;
+
+cuerpoCasesVB::=            cuerpoCasesVB CASEVBID expresionVB cuerpoModuloVB
+                            |cuerpoCasesVB CASEVBID ELSEIDVB cuerpoModuloVB
+                            |CASEVBID expresionVB cuerpoModuloVB
+                            |CASEVBID ELSEIDVB cuerpoModuloVB;
+
+condicionalIfElse::=         IFIDVB ExpresionLogica THENID cuerpoModuloVB ENDID IFIDVB
+                            |IFIDVB ExpresionLogica THENID cuerpoModuloVB condicionalElse ENDID IFIDVB;
+
+condicionalElse::=          ELSEIDVB cuerpoModuloVB;
+    
+expresionVB::=              expresionJV;
+
+//expresionVarVB::=           expresionVB
+//                           |ID PARABRE NUMERO PARCIERRA;
+//-----------------------------------PYTHON-----------------------------------
+
+cuerpoPY::=                 declaracionVarPY
+                            |declaracionMetodo
+                            |ciclosPY
+                            |condicionalesPY;
+
+declaracionMetodo::=        DEFID ID PARABRE PARCIERRA cuerpoMetodoPY  
+                            |DEFID ID PARABRE PARCIERRA paramPY cuerpoMetodoPY;
+
+cuerpoMetodoPY1::=           DOSPUNTOS cuerpoCPY;   
+
+cuerpoCPY::=                cuerpoCPY cuerpoMetodoPY
+                            |cuerpoMetodoPY;
+
+cuerpoMetodoPY::=            condicionalesPY 
+                            |ciclosPY
+                            |declaracionVarPY;
+
+declaracionVarPY::=         ID IGUAL expresionPY;
+
+paramPY::=                  paramPY COMA ID 
+                            |ID;
+
+ciclosPY::=                 cicloForPY
+                            |whilePY ;
+
+condicionalesPY::=          ifElsePY 
+                            |switchPY;
+
+cicloForPY::=               FORID ID paramFor INRANGEID PARABRE paramFor PARCIERRA DOSPUNTOS cuerpoCicloPY
+                            FORID ID paramFor INRANGEID LLAVEABRE paramFor LLAVECIERRA DOSPUNTOS cuerpoCicloPY;
+
+whilePY::=                  WHILEID ExpresionLogica DOSPUNTOS cuerpoCicloPY;
+
+paramFor::=                 paramFor COMA expresionPY
+                            |expresionPY;
+
+ifElsePY::=                 IFID ExpresionLogica cuerpoCicloPY ELSEID cuerpoCicloPY;
+
+
+    //|ifElsePY ELIFID ExpresionLogica cuerpoCicloPY|ELIFID ExpresionLogica cuerpoCicloPY ;
+
+
+cuerpoCicloPY::=            cuerpoMetodoPY
+                            |CONTINUEID
+                            |BREAKID;
+
+expresionPY::=          expresionJV;
+
+//=================== LENGUAJE C=============================
+
+cuerpoC::=                  INCLUDEID  MENOR ID MAYOR
+                            INCLUDEID  STRING
+                            |VOIDID ID declaracionFuncionC
+                            |tipos ID declaracionesC
+                            |PRINFID PARABRE cuerpoPrint PARCIERRA PUNTOYCOMA
+                            |MAINID PARABRE PARCIERRA LLAVEABRE cuerpoFuncionC LLAVECIERRA;
+
+cuerpoPrint::=              STRING;
+
+declaracionesC::=           declaracionFuncionC
+                            |daclaracionVarC;
+                            
+declaracionFuncionC::=      ID PARABRE parametroFuncionC PARCIERRA LLAVEABRE cuerpoFuncionC LLAVECIERRA
+                            | ID PARABRE PARCIERRA LLAVEABRE cuerpoFuncionC LLAVECIERRA;
+
+
+daclaracionVarC::=          SIMIGUAL expresionJV PUNTOYCOMA
+                            |PUNTOYCOMA;
+
+
+parametroFuncionC::=        parametroFuncionC COMA tipos ID
+                            |tipos ID; 
+
+cuerpoFuncionC::=           daclaracionAsignacionVarC
+                            |RETURNID expresionC PUNTOYCOMA
+                            |RETURNID PUNTOYCOMA
+                            |ciclosC
+                            |leerDatoC
+                            |printDatoC
+                            |condicionalesC;
+
+printDatoC::=               PRINFID PARABRE valPrint PARCIERRA PUNTOYCOMA;
+
+valPrint::=                 STRING
+                            |ID
+                            |STRING COMA valPrint1;
+
+valPrint1::=                valPrint1 COMA ID
+                             |ID;
+                        
+
+leerDatoC::=                SCANFID PARABRE valLeerDato PARCIERRA PUNTOYCOMA;
+
+valLeerDato::=              COMILLA indicadores COMILLA COMA SIMY ID;
+
+daclaracionAsignacionVarC::=    daclaracionVarC
+                                |ID SIMIGUAL expresionJV PUNTOYCOMA;
+
+ciclosC::=                  forC
+                            |whileC
+                            |doWhileC;
+
+condicionalesC::=           elseif
+                            |switchCaseC;
+
+indicadores::=              INDICADORFLOAT
+                            |INDICADORINT
+                            |INDICADORCHAR;
+
+forC::=         FORID PARABRE paramForC PARCIERRA LLAVEABRE cuerpoFuncionC LLAVECIERRA;
+
+paramForC::=    daclaracionAsignacionVarC ExpresionLogica PUNTOYCOMA incrementos PUNTOYCOMA;
+
+whileC::=       WHILEID   PARABRE ExpresionLogica PARCIERRA LLAVEABRE cuerpoFuncionC LLAVECIERRA;
+
+doWhileC::=     DOID    LLAVEABRE cuerpoFuncionC LLAVECIERRA WHILEID   PARABRE ExpresionLogica PARCIERRA PUNTOYCOMA;
+
+
+
+ifC::=                  IFID PARABRE ExpresionLogica PARCIERRA LLAVEABRE cuerpoFuncionC LLAVECIERRA;
+
+elseif::=               elseif ELSEID LLAVEABRE cuerpoFuncionC LLAVECIERRA
+                        | elseif ELSEID ifC
+                        |ifC;
+
+
+switchCaseC::=          SWITCHID PARABRE ID PARCIERRA LLAVEABRE cuerpoSwitchC LLAVECIERRA;
+
+cuerpoSwitchC::=         cuerpoSwitchC caseC
+                        |cuerpoSwitchC DEFAULTID DOSPUNTOS cuerpoCase
+                        |DEFAULTID DOSPUNTOS cuerpoCase
+                        |caseC;
+
+caseC::=                CASEID expresionJV DOSPUNTOS cuerpoCase;
+
+cuerpoCase::=           cuerpoFuncionC BREAKID PUNTOYCOMA
+                        |cuerpoFuncionC ;
+
+ expresionC::=           expresionJV: e {:RESULT=e;:}; 
+
+//-----------------------------------GENERAL----------------------------------
+tipos::=    CHARID:t      {:Nodo nodo = new Nodo("CHAR", null, null, null); RESULT = t.toString();:}
+            |INTID:t      {:RESULT = t.toString();:}
+            |FLOATID:t    {:RESULT = t.toString();:};
+
+booleanos::=        TRUE    {:RESULT=new ExpresionTipo("1","boolean");:}
+                    |FALSE  {:RESULT=new ExpresionTipo("0","boolean");:};
+
+
